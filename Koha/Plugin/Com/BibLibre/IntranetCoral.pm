@@ -38,8 +38,11 @@ sub intranet_catalog_biblio_tab {
     my ( $self, $args ) = @_;
     my $cgi = $self->{'cgi'};
     my $biblionumber = $cgi->param('biblionumber');
-    warn $biblionumber;
     return unless $biblionumber;
+
+    my $coralURL = $self->retrieve_data('coralURL');
+    return unless $coralURL;
+    $coralURL .= "/resources/api/";
 
     my $record = GetMarcBiblio({ biblionumber => $biblionumber });
 
@@ -56,16 +59,16 @@ sub intranet_catalog_biblio_tab {
 
     # Coral resource info
     if (@$marcisbnsarray) {
-        my $coralResources = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getResource(@$marcisbnsarray[0]);
+        my $coralResources = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getResource(@$marcisbnsarray[0], $coralURL);
         my $coralResource;
         my $coralLicences;
         my $coralPackages;
         my $coralTitles;
         if ($coralResources != -1) {
             foreach (@$coralResources[0]) {
-                $coralLicences = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getLicenses($_->{'resourceID'});
-                $coralTitles = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getTitles($_->{'resourceID'});
-                $coralPackages = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getPackages($_->{'resourceID'});
+                $coralLicences = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getLicenses($_->{'resourceID'}, $coralURL);
+                $coralTitles = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getTitles($_->{'resourceID'}, $coralURL);
+                $coralPackages = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getPackages($_->{'resourceID'}, $coralURL);
                 $coralResource = $_;
             }
         }
@@ -83,4 +86,28 @@ sub intranet_catalog_biblio_tab {
 
     push @tabs, $tab;
     return @tabs;
+}
+
+sub configure {
+    my ( $self, $args ) = @_;
+    my $cgi = $self->{'cgi'};
+
+    unless ( $cgi->param('save') ) {
+        my $template = $self->get_template({ file => 'configure.tt' });
+
+        ## Grab the values we already have for our settings, if any exist
+        $template->param(
+            coralURL => $self->retrieve_data('coralURL'),
+        );
+
+        $self->output_html( $template->output() );
+    }
+    else {
+        $self->store_data(
+            {
+                coralURL => $cgi->param('coralURL'),
+            }
+        );
+        $self->go_home();
+    }
 }

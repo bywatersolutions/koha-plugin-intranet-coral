@@ -1,6 +1,8 @@
 package Koha::Plugin::Com::BibLibre::IntranetCoral;
-
+use Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral;
 use base qw(Koha::Plugins::Base);
+use C4::Biblio;
+use Data::Dumper;
 
 our $VERSION = "0.1";
 
@@ -35,8 +37,50 @@ sub new {
 sub intranet_catalog_biblio_tab {
     my ( $self, $args ) = @_;
     my $cgi = $self->{'cgi'};
+    my $biblionumber = $cgi->param('biblionumber');
+    warn $biblionumber;
+    return unless $biblionumber;
+
+    my $record = GetMarcBiblio({ biblionumber => $biblionumber });
+
+    return unless $record;
+
+    my $marcflavour  = C4::Context->preference("marcflavour");
+
+    my $marcisbnsarray   = GetMarcISBN( $record, $marcflavour );
+
+    my @tabs;
+    my $tab = {};
 
     my $template = $self->get_template({ file => 'intranet-coral.tt' });
 
-    $self->output_html( $template->output() );
+    # Coral resource info
+    if (@$marcisbnsarray) {
+        my $coralResources = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getResource(@$marcisbnsarray[0]);
+        my $coralResource;
+        my $coralLicences;
+        my $coralPackages;
+        my $coralTitles;
+        if ($coralResources != -1) {
+            foreach (@$coralResources[0]) {
+                $coralLicences = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getLicenses($_->{'resourceID'});
+                $coralTitles = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getTitles($_->{'resourceID'});
+                $coralPackages = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getPackages($_->{'resourceID'});
+                $coralResource = $_;
+            }
+        }
+        if ($coralResource) {
+            $template->param('coralResource' => $coralResource);
+            $template->param('coralLicenses' => $coralLicences) if ($coralLicences);
+            $template->param('coralPackages' => $coralPackages) if ($coralPackages);
+            $template->param('coralTitles' => $coralTitles) if ($coralTitles);
+        }
+    }
+
+
+    $tab->{'content'} = $template->output();
+    $tab->{'title'} = "Coral";
+
+    push @tabs, $tab;
+    return @tabs;
 }

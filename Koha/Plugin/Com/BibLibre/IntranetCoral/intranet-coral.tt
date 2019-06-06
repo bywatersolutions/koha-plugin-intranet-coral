@@ -1,0 +1,84 @@
+[% IF ( coralResource ) %]
+<div id="coral">
+<h4>[% coralResource.titleText %]</h4>
+<table>
+    <tr><td>Status</td><td>[% coralResource.status %]</td></tr>
+    <tr><td>Resource Type</td><td>[% coralResource.resourceType %]</td></tr>
+    <tr><td>Resource Format</td><td>[% coralResource.resourceFormat %]</td></tr>
+    [% IF (coralResource.isbnOrIssn) %]
+        <tr><td>Identifiers</td><td>[% FOREACH identifier IN coralResource.isbnOrIssn %][% identifier %]<br />[% END %]</td></tr>
+    [% END %]
+    [% IF (coralResource.aliases) %]
+        <tr><td>Aliases</td><td>[% FOREACH alias IN coralResource.aliases %][% alias %]<br />
+    [% END %]</td></tr>
+    [% IF coralPackages %]
+        <tr><td>Part of the packages</td><td>
+        [% FOREACH coralPackage IN coralPackages %]
+            [% coralPackage.titleText %]<br />
+        [% END %]
+        </td></tr>
+    [% END %]
+    [% IF coralTitles %]
+        <tr><td>Containing titles</td><td>
+        [% FOREACH coralTitle IN coralTitles %]
+            [% coralTitle.titleText %]<br />
+        [% END %]
+        </td></tr>
+    [% END %]
+
+    [% END %]
+</table>
+
+[% IF coralLicenses %]
+<ul>
+[% FOREACH coralLicense IN coralLicenses %]
+<br />
+<li><h4>License: [% coralLicense.shortName %]</h4>
+    <table>
+    <tr><td>Creation date</td><td>[% coralLicense.createDate %]</td></tr>
+    </table>
+        <ul>
+        [% FOREACH document IN coralLicense.documents %]
+            <li><h5>Document: [% document.content.shortName %]</h5>
+            <table>
+                <tr><td>Document URL</td><td>[% document.content.documentURL %]</td></tr>
+                <tr><td>Document Type</td><td>[% document.content.documentType %]</td></tr>
+            </table>
+            <table>
+                <thead>
+                <tr><th>Type</<th><th>Document Text</th><th>Qualifier</th></tr>
+                </thead>
+                <tbody>
+                [% FOREACH expression IN document.expressions %]
+                    <tr>
+                        <td>[% expression.content.expressionType %]</td>
+                        <td>[% expression.content.documentText %]</td>
+                        <td>
+                        [% IF expression.qualifiers %]
+                            [% FOREACH qualifier IN expression.qualifiers %]
+                                [% qualifier %]<br />
+                            [% END %]
+                        [% END %]
+                        </td>
+                    </tr>
+                    [% IF expression.notes %]
+                        <tr><td></td><td colspan="2">Display Notes: <ul>
+                        [% FOREACH note IN expression.notes %]
+                            <li>[% note.note %]</li>
+                        [% END %]
+                        </ul>
+                        </td></tr>
+                    [% END %]
+                [% END %]
+                </td></tr></tbody>
+            </table></li>
+        [% END %]
+        </ul>
+</li>
+[% END %]
+</ul>
+[% END %]
+</div>
+[% END %]
+
+

@@ -1,6 +1,6 @@
 [% IF ( coralResource ) %]
 <div id="coral">
-<h3>[% coralResource.titleText %]</h3>
+<h3><a href="[% coralResource.url %]">[% coralResource.titleText %]</a></h3>
 <details>
 <summary>Resource details</summary>
 <table>
@@ -16,14 +16,14 @@
     [% IF coralPackages %]
         <tr><td>Part of the packages</td><td>
         [% FOREACH coralPackage IN coralPackages %]
-            [% coralPackage.titleText %]<br />
+            <a href=[% coralPackage.url %]">[% coralPackage.titleText %]</a><br />
         [% END %]
         </td></tr>
     [% END %]
     [% IF coralTitles %]
         <tr><td>Containing titles</td><td>
         [% FOREACH coralTitle IN coralTitles %]
-            [% coralTitle.titleText %]<br />
+            <a href=[% coralTitle.url %]">[% coralTitle.titleText %]</a><br />
         [% END %]
         </td></tr>
     [% END %]
@@ -34,7 +34,7 @@
 <h3>Licenses</h3>
 [% FOREACH coralLicense IN coralLicenses %]
 <details>
-<summary>[% coralLicense.shortName %]</summary>
+<summary><a href="[% coralLicense.url %]">[% coralLicense.shortName %]</a></summary>
     <table>
     <tr><td>Creation date</td><td>[% coralLicense.createDate %]</td></tr>
     </table>
@@ -44,7 +44,7 @@
             <details>
             <summary>[% document.content.shortName %]</summary>
             <table>
-                <tr><td>Document URL</td><td>[% document.content.documentURL %]</td></tr>
+                <tr><td>Document URL</td><td><a href="[% document.content.url %]">[% document.content.documentURL %]</a></td></tr>
                 <tr><td>Document Type</td><td>[% document.content.documentType %]</td></tr>
             </table>
             [% IF document.expressions %]

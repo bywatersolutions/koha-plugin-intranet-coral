@@ -16,14 +16,14 @@
     [% IF coralPackages %]
         <tr><td>Part of the packages</td><td>
         [% FOREACH coralPackage IN coralPackages %]
-            <a href=[% coralPackage.url %]">[% coralPackage.titleText %]</a><br />
+            <a href="[% coralPackage.url %]">[% coralPackage.titleText %]</a><br />
         [% END %]
         </td></tr>
     [% END %]
     [% IF coralTitles %]
         <tr><td>Containing titles</td><td>
         [% FOREACH coralTitle IN coralTitles %]
-            <a href=[% coralTitle.url %]">[% coralTitle.titleText %]</a><br />
+            <a href="[% coralTitle.url %]">[% coralTitle.titleText %]</a><br />
         [% END %]
         </td></tr>
     [% END %]

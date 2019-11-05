@@ -1,17 +1,18 @@
 package Koha::Plugin::Com::BibLibre::IntranetCoral;
 use Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral;
 use base qw(Koha::Plugins::Base);
+use Koha::Plugins::Tab;
 use C4::Biblio;
 use Data::Dumper;
 
-our $VERSION = "0.1";
+our $VERSION = "0.2";
 
 our $metadata = {
     name            => 'Intranet Coral Plugin',
     author          => 'Matthias Meusburger',
     date_authored   => '2019-06-05',
-    date_updated    => "2019-06-05",
-    minimum_version => '19.05.00.000',
+    date_updated    => "2019-11-05",
+    minimum_version => '19.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
     description     => 'This plugin displays informations from CORAL ERM in intranet biblio details'
@@ -53,7 +54,6 @@ sub intranet_catalog_biblio_tab {
     my $marcisbnsarray   = GetMarcISBN( $record, $marcflavour );
 
     my @tabs;
-    my $tab = {};
 
     my $template = $self->get_template({ file => 'intranet-coral.tt' });
 
@@ -80,11 +80,13 @@ sub intranet_catalog_biblio_tab {
         }
     }
 
-
-    $tab->{'content'} = $template->output();
-    $tab->{'title'} = "Coral";
-
-    push @tabs, $tab;
+    push @tabs,
+      Koha::Plugins::Tab->new(
+        {
+           title   => 'Coral',
+           content => $template->output()
+        }
+      );
     return @tabs;
 }
 

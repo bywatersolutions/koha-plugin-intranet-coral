@@ -5,13 +5,14 @@ use Koha::Plugins::Tab;
 use C4::Biblio;
 use Data::Dumper;
 
-our $VERSION = "0.2";
+
+our $VERSION = "0.25";
 
 our $metadata = {
     name            => 'Intranet Coral Plugin',
     author          => 'Matthias Meusburger',
     date_authored   => '2019-06-05',
-    date_updated    => "2019-11-05",
+    date_updated    => "2021-07-26",
     minimum_version => '19.11.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -51,19 +52,29 @@ sub intranet_catalog_biblio_tab {
 
     my $marcflavour  = C4::Context->preference("marcflavour");
 
+    # fetch both ISBNs and ISSNs
     my $marcisbnsarray   = GetMarcISBN( $record, $marcflavour );
+    my $marcissnsarray   = GetMarcISSN( $record, $marcflavour );
+    my @marcidsarray   = (@$marcisbnsarray, @$marcissnsarray);
 
     my @tabs;
 
     my $template = $self->get_template({ file => 'intranet-coral.tt' });
 
     # Coral resource info
-    if (@$marcisbnsarray) {
-        my $coralResources = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getResource(@$marcisbnsarray[0], $coralURL);
+    if (@marcidsarray) {
         my $coralResource;
         my $coralLicences;
         my $coralPackages;
         my $coralTitles;
+
+        # iterate over the identifiers until you get a hit
+        my $coralResources = '[]';
+        my $i = 0;
+        while ($coralResources == '[]' && $i < scalar @marcidsarray ) {
+            $coralResources = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getResource(@marcidsarray[$i], $coralURL);
+        }
+
         if ($coralResources != -1) {
             foreach (@$coralResources[0]) {
                 $coralLicences = Koha::Plugin::Com::BibLibre::IntranetCoral::WebServices::Coral::getLicenses($_->{'resourceID'}, $coralURL);
@@ -113,3 +124,4 @@ sub configure {
         $self->go_home();
     }
 }
+

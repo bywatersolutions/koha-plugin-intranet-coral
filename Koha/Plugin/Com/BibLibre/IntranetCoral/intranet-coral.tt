@@ -1,6 +1,6 @@
 [% IF ( coralResource ) %]
 <div id="coral">
-<h3><a href="[% coralResource.url %]">[% coralResource.titleText %]</a></h3>
+<h3><a href="[% coralResource.resourceURL %]">[% coralResource.titleText %]</a></h3>
 <details>
 <summary>Resource details</summary>
 <table>
